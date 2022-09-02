@@ -8,7 +8,6 @@ fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 
     let bytecode = if !args[1].is_empty() && Path::new(&args[0]).exists() {
-        println!("{}", args[1]);
         let file = Path::new(&args[1]);
         fs::read_to_string(file)?
     } else {
@@ -16,7 +15,6 @@ fn main() -> Result<()> {
     };
 
     let parsed = parser::parse(&bytecode).expect("Failed to parse");
-    println!("{:?}", parsed);
     let (_, opcodes) = parsed;
     print!("{}", formatter::format(&opcodes));
 

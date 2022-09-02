@@ -79,5 +79,6 @@ pub enum OpCode<'a> {
     STATICCALL,
     REVERT,
     SELFDESTRUCT,
+    INVALID(u8),
 }
 

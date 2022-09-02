@@ -78,6 +78,7 @@ pub fn fmt_opcode(op: &OpCode) -> String {
         STATICCALL => "STATICCALL".into(),
         REVERT => "REVERT".into(),
         SELFDESTRUCT => "SELFDESTRUCT".into(),
+        INVALID(op) => format!("INVALID(0x{:x})", op),
         PUSHN(n, v) => format!("PUSH{}\t0x{}", n, v),
         DUPN(n) => format!("DUP{}", n),
         SWAPN(n) => format!("SWAP{}", n),
