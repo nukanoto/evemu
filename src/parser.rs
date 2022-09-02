@@ -12,7 +12,7 @@ fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
 }
 
 fn is_hex_digit(c: char) -> bool {
-    c.is_digit(16)
+    c.is_ascii_hexdigit()
 }
 
 fn parse_hex_u8(input: &str) -> IResult<&str, u8> {
@@ -102,22 +102,22 @@ fn parse_opcode(input: &str) -> IResult<&str, OpCode> {
             let mut input = input;
             let result: OpCode;
 
-            if op >= 0x60 && op < 0x80 {
+            if (0x60..0x80).contains(&op) {
                 // PUSH1-32
                 let n = op - 0x60 + 1;
                 let (input_, value) =
                     take_while_m_n((n * 2).into(), (n * 2).into(), is_hex_digit)(input)?;
                 input = input_;
                 result = OpCode::PUSHN(n, value);
-            } else if op >= 0x80 && op < 0x90 {
+            } else if (0x80..0x90).contains(&op) {
                 // DUP1-32
                 let n = op - 0x80 + 1;
                 result = OpCode::DUPN(n);
-            } else if op >= 0x90 && op < 0xA0 {
+            } else if (0x90..0xA0).contains(&op) {
                 // SWAP1-32
                 let n = op - 0x90 + 1;
                 result = OpCode::SWAPN(n);
-            } else if op >= 0xA0 && op < 0xA5 {
+            } else if (0xA0..0xA5).contains(&op) {
                 // LOG1-32
                 let n = op - 0xA0 + 1;
                 result = OpCode::LOGN(n);

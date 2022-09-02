@@ -86,11 +86,11 @@ pub fn fmt_opcode(op: &OpCode) -> String {
     }
 }
 
-pub fn format<'a>(opcodes: &'a [OpCode]) -> String {
+pub fn format(opcodes: &'_ [OpCode]) -> String {
     let mut result = String::new();
     for op in opcodes {
       let fmted_op = fmt_opcode(op);
-      result += &format!("{}\n", fmted_op);
+      result = format!("{}{}\n", result, fmted_op);
     }
     result
 }
