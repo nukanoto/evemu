@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum OpCode<'a> {
     STOP,
     ADD,
@@ -79,6 +79,5 @@ pub enum OpCode<'a> {
     STATICCALL,
     REVERT,
     SELFDESTRUCT,
-    Help(String),
 }
 

@@ -122,7 +122,7 @@ fn parse_opcode(input: &str) -> IResult<&str, OpCode> {
                 let n = op - 0xA0 + 1;
                 result = OpCode::LOGN(n);
             } else {
-                result = OpCode::Help(format!("{:2x}", op));
+                unreachable!()
             }
 
             (input, result)

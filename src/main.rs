@@ -1,4 +1,5 @@
 use anyhow::Result;
+use evm_disasm::formatter;
 use std::{env, fs, path::Path};
 
 use evm_disasm::parser;
@@ -13,8 +14,11 @@ fn main() -> Result<()> {
     } else {
         args[1].to_string()
     };
-    
-    println!("{:?}", parser::parse(&bytecode));
+
+    let parsed = parser::parse(&bytecode).expect("Failed to parse");
+    println!("{:?}", parsed);
+    let (_, opcodes) = parsed;
+    print!("{}", formatter::format(&opcodes));
 
     Ok(())
 }
