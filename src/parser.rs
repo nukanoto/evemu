@@ -8,44 +8,6 @@ use nom_locate::{LocatedSpan};
 
 use crate::{block::Block, opcode::OpCode};
 
-/*
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-struct Span<'a> {
-    input: &'a str,
-    position: i128
-}
-
-impl Span<'_> {
-    pub fn new(input: &str) -> Self {
-        Self {
-            input,
-            position: 0
-        }
-    }
-}
-
-trait IntoSpan<'a> where Self: Into<&'a str> {
-    fn into(&self, position: i128) -> Span {
-        Span {
-            input: &str::from(self.into()),
-            position,
-        }
-    }
-}
-
-impl From<&str> for Span<'_> {
-    fn from(item: &str) -> Self {
-        Self::new(item)
-    }
-}
-
-impl From<Span<'_>> for &str {
-    fn from(item: Span) -> Self {
-        item.input
-    }
-}
-*/
-
 type Span<'a> = LocatedSpan<&'a str>;
 
 fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
