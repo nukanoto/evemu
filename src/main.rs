@@ -14,9 +14,8 @@ fn main() -> Result<()> {
         args[1].to_string()
     };
 
-    let parsed = parser::parse(&bytecode).expect("Failed to parse");
-    let (_, opcodes) = parsed;
-    print!("{}", formatter::format(&opcodes));
+    let parsed = parser::parse(&bytecode);
+    print!("{}", formatter::format(&parsed));
 
     Ok(())
 }

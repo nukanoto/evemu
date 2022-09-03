@@ -4,8 +4,49 @@ use nom::{
     multi::many0,
     IResult,
 };
+use nom_locate::LocatedSpan;
 
 use crate::opcode::OpCode;
+
+/*
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+struct Span<'a> {
+    input: &'a str,
+    position: i128
+}
+
+impl Span<'_> {
+    pub fn new(input: &str) -> Self {
+        Self {
+            input,
+            position: 0
+        }
+    }
+}
+
+trait IntoSpan<'a> where Self: Into<&'a str> {
+    fn into(&self, position: i128) -> Span {
+        Span {
+            input: &str::from(self.into()),
+            position,
+        }
+    }
+}
+
+impl From<&str> for Span<'_> {
+    fn from(item: &str) -> Self {
+        Self::new(item)
+    }
+}
+
+impl From<Span<'_>> for &str {
+    fn from(item: Span) -> Self {
+        item.input
+    }
+}
+*/
+
+type Span<'a> = LocatedSpan<&'a str>;
 
 fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
     u8::from_str_radix(input, 16)
@@ -15,11 +56,37 @@ fn is_hex_digit(c: char) -> bool {
     c.is_ascii_hexdigit()
 }
 
-fn parse_hex_u8(input: &str) -> IResult<&str, u8> {
-    map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input)
+fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
+    let input_str = input.fragment();
+    let raw: IResult<&str, u8> = map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input_str);
+    let wrapped = raw
+        .map(|r| {
+            (
+                unsafe {
+                    Span::new_from_raw_offset(
+                        input.location_offset(),
+                        input.location_line(),
+                        r.0,
+                        input.extra,
+                    )
+                },
+                r.1,
+            )
+        })
+        .map_err(|e| {
+            e.map_input(|e| unsafe {
+                Span::new_from_raw_offset(
+                    input.location_offset(),
+                    input.location_line(),
+                    e,
+                    input.extra,
+                )
+            })
+        });
+    wrapped
 }
 
-fn parse_opcode(input: &str) -> IResult<&str, OpCode> {
+fn parse_opcode(input: Span) -> IResult<Span, OpCode> {
     let (input, op) = parse_hex_u8(input)?;
 
     let (input, result) = match op {
@@ -108,7 +175,7 @@ fn parse_opcode(input: &str) -> IResult<&str, OpCode> {
                 let (input_, value) =
                     take_while_m_n((n * 2).into(), (n * 2).into(), is_hex_digit)(input)?;
                 input = input_;
-                result = OpCode::PUSHN(n, value);
+                result = OpCode::PUSHN(n, value.fragment());
             } else if (0x80..0x90).contains(&op) {
                 // DUP1-32
                 let n = op - 0x80 + 1;
@@ -132,10 +199,17 @@ fn parse_opcode(input: &str) -> IResult<&str, OpCode> {
     Ok((input, result))
 }
 
-pub fn parse(input: &str) -> IResult<&str, Vec<OpCode>> {
+fn parse_root(span: Span) -> IResult<Span, Vec<OpCode>> {
+    let input = span;
     let (input, _) = opt(tag("0x"))(input)?;
     let (input, result) = many0(parse_opcode)(input)?;
     Ok((input, result))
+}
+
+pub fn parse(input: &str) -> Vec<OpCode> {
+    let span = Span::new(input);
+    let (_, parsed) = parse_root(span).expect("Failed to parse"); // TODO: remove expect
+    parsed
 }
 
 #[cfg(test)]
@@ -158,7 +232,25 @@ mod tests {
         let parsed = parse(bytecode);
         assert_eq!(
             parsed,
-            Ok(("", vec![PUSHN(1, "0f"), DUPN(1), PUSHN(1, "09"), RETURNDATASIZE, CODECOPY, RETURNDATASIZE, RETURN, PUSHN(1, "00"), CALLDATALOAD, PUSHN(1, "20"), CALLDATALOAD, STOP, PUSHN(1, "00"), MSTORE, PUSHN(1, "20"), PUSHN(1, "00"), RETURN]))
+            vec![
+                PUSHN(1, "0f"),
+                DUPN(1),
+                PUSHN(1, "09"),
+                RETURNDATASIZE,
+                CODECOPY,
+                RETURNDATASIZE,
+                RETURN,
+                PUSHN(1, "00"),
+                CALLDATALOAD,
+                PUSHN(1, "20"),
+                CALLDATALOAD,
+                STOP,
+                PUSHN(1, "00"),
+                MSTORE,
+                PUSHN(1, "20"),
+                PUSHN(1, "00"),
+                RETURN
+            ]
         );
     }
 }
