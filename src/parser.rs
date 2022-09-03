@@ -1,10 +1,10 @@
 use nom::{
-    bytes::complete::{tag, take_while_m_n},
-    combinator::{map_res, opt},
+    bytes::complete::{take_while_m_n},
+    combinator::{map_res},
     multi::many0,
     IResult,
 };
-use nom_locate::{position, LocatedSpan};
+use nom_locate::{LocatedSpan};
 
 use crate::{block::Block, opcode::OpCode};
 
@@ -59,7 +59,8 @@ fn is_hex_digit(c: char) -> bool {
 fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
     let input_str = input.fragment();
     let raw: IResult<&str, u8> = map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input_str);
-    let wrapped = raw
+    
+    raw
         .map(|r| {
             (
                 unsafe {
@@ -67,7 +68,7 @@ fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
                         input.location_offset() + 2,
                         input.location_line(),
                         r.0,
-                        input.extra,
+                        (),
                     )
                 },
                 r.1,
@@ -79,11 +80,10 @@ fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
                     input.location_offset() + 2,
                     input.location_line(),
                     e,
-                    input.extra,
+                    (),
                 )
             })
-        });
-    wrapped
+        })
 }
 
 fn parse_opcode(input: Span) -> IResult<Span, OpCode> {

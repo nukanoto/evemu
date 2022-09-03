@@ -1,5 +1,5 @@
 use anyhow::Result;
-use evm_disasm::formatter;
+
 use std::{env, fs, path::Path};
 
 use evm_disasm::parser;
