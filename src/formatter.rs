@@ -1,11 +1,22 @@
-use crate::opcode::OpCode;
+use crate::{block::Block, opcode::OpCode};
+use std::fmt::Write as _;
 
-pub fn fmt_opcode(op: &OpCode) -> String {
+pub fn format(blocks: &'_ [Block]) -> String {
+    let mut result = String::new();
+    for b in blocks {
+        let fmted_op = fmt_opcode(&b.opcode);
+        let _ = writeln!(result, "{:08x}: {}", b.position, fmted_op);
+    }
+    result
+}
+
+fn fmt_opcode(op: &OpCode) -> String {
     use OpCode::*;
 
     match op {
         STOP => "STOP".into(),
-        ADD => "ADD".into(), MUL => "MUL".into(),
+        ADD => "ADD".into(),
+        MUL => "MUL".into(),
         SUB => "SUB".into(),
         DIV => "DIV".into(),
         SDIV => "SDIV".into(),
@@ -84,13 +95,4 @@ pub fn fmt_opcode(op: &OpCode) -> String {
         SWAPN(n) => format!("SWAP{}", n),
         LOGN(n) => format!("LOG{}", n),
     }
-}
-
-pub fn format(opcodes: &'_ [OpCode]) -> String {
-    let mut result = String::new();
-    for op in opcodes {
-      let fmted_op = fmt_opcode(op);
-      result = format!("{}{}\n", result, fmted_op);
-    }
-    result
 }

@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use std::{env, fs, path::Path};
 
-use evm_disasm::parser;
+use evm_disasm::{parser, formatter};
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -15,8 +15,7 @@ fn main() -> Result<()> {
     };
 
     let parsed = parser::parse(&bytecode);
-    println!("{:?}", parsed);
-    // print!("{}", formatter::format(&parsed));
+    print!("{}", formatter::format(&parsed));
 
     Ok(())
 }
