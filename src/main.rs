@@ -15,7 +15,8 @@ fn main() -> Result<()> {
     };
 
     let parsed = parser::parse(&bytecode);
-    print!("{}", formatter::format(&parsed));
+    println!("{:?}", parsed);
+    // print!("{}", formatter::format(&parsed));
 
     Ok(())
 }

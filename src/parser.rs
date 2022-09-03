@@ -4,9 +4,9 @@ use nom::{
     multi::many0,
     IResult,
 };
-use nom_locate::LocatedSpan;
+use nom_locate::{position, LocatedSpan};
 
-use crate::opcode::OpCode;
+use crate::{block::Block, opcode::OpCode};
 
 /*
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
@@ -64,7 +64,7 @@ fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
             (
                 unsafe {
                     Span::new_from_raw_offset(
-                        input.location_offset(),
+                        input.location_offset() + 2,
                         input.location_line(),
                         r.0,
                         input.extra,
@@ -76,7 +76,7 @@ fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
         .map_err(|e| {
             e.map_input(|e| unsafe {
                 Span::new_from_raw_offset(
-                    input.location_offset(),
+                    input.location_offset() + 2,
                     input.location_line(),
                     e,
                     input.extra,
@@ -199,14 +199,20 @@ fn parse_opcode(input: Span) -> IResult<Span, OpCode> {
     Ok((input, result))
 }
 
-fn parse_root(span: Span) -> IResult<Span, Vec<OpCode>> {
+fn parse_block(span: Span) -> IResult<Span, Block> {
+    let position = span.location_offset() / 2;
+    let (span, opcode) = parse_opcode(span)?;
+    let block = Block::new(opcode, position);
+    Ok((span, block))
+}
+
+fn parse_root(span: Span) -> IResult<Span, Vec<Block>> {
     let input = span;
-    let (input, _) = opt(tag("0x"))(input)?;
-    let (input, result) = many0(parse_opcode)(input)?;
+    let (input, result) = many0(parse_block)(input)?;
     Ok((input, result))
 }
 
-pub fn parse(input: &str) -> Vec<OpCode> {
+pub fn parse(input: &str) -> Vec<Block> {
     let span = Span::new(input);
     let (_, parsed) = parse_root(span).expect("Failed to parse"); // TODO: remove expect
     parsed
@@ -214,6 +220,8 @@ pub fn parse(input: &str) -> Vec<OpCode> {
 
 #[cfg(test)]
 mod tests {
+    use crate::block::Block;
+
     use super::{parse, OpCode::*};
 
     #[test]
@@ -228,28 +236,79 @@ mod tests {
             0x20 0x00 return      // return the result
         }
          */
-        let bytecode = "0x600f8060093d393df36000356020350160005260206000f3";
+        let bytecode = "600f8060093d393df36000356020350160005260206000f3";
         let parsed = parse(bytecode);
         assert_eq!(
             parsed,
             vec![
-                PUSHN(1, "0f"),
-                DUPN(1),
-                PUSHN(1, "09"),
-                RETURNDATASIZE,
-                CODECOPY,
-                RETURNDATASIZE,
-                RETURN,
-                PUSHN(1, "00"),
-                CALLDATALOAD,
-                PUSHN(1, "20"),
-                CALLDATALOAD,
-                STOP,
-                PUSHN(1, "00"),
-                MSTORE,
-                PUSHN(1, "20"),
-                PUSHN(1, "00"),
-                RETURN
+                Block {
+                    opcode: PUSHN(1, "0f"),
+                    position: 0
+                },
+                Block {
+                    opcode: DUPN(1),
+                    position: 2
+                },
+                Block {
+                    opcode: PUSHN(1, "09"),
+                    position: 3
+                },
+                Block {
+                    opcode: RETURNDATASIZE,
+                    position: 5
+                },
+                Block {
+                    opcode: CODECOPY,
+                    position: 6
+                },
+                Block {
+                    opcode: RETURNDATASIZE,
+                    position: 7
+                },
+                Block {
+                    opcode: RETURN,
+                    position: 8
+                },
+                Block {
+                    opcode: PUSHN(1, "00"),
+                    position: 9
+                },
+                Block {
+                    opcode: CALLDATALOAD,
+                    position: 11
+                },
+                Block {
+                    opcode: PUSHN(1, "20"),
+                    position: 12
+                },
+                Block {
+                    opcode: CALLDATALOAD,
+                    position: 14
+                },
+                Block {
+                    opcode: ADD,
+                    position: 15
+                },
+                Block {
+                    opcode: PUSHN(1, "00"),
+                    position: 16
+                },
+                Block {
+                    opcode: MSTORE,
+                    position: 18
+                },
+                Block {
+                    opcode: PUSHN(1, "20"),
+                    position: 19
+                },
+                Block {
+                    opcode: PUSHN(1, "00"),
+                    position: 21
+                },
+                Block {
+                    opcode: RETURN,
+                    position: 23
+                }
             ]
         );
     }
