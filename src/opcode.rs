@@ -81,4 +81,3 @@ pub enum OpCode<'a> {
     SELFDESTRUCT,
     INVALID(u8),
 }
-
