@@ -90,7 +90,7 @@ fn fmt_opcode(op: &OpCode) -> String {
         REVERT => "REVERT".into(),
         SELFDESTRUCT => "SELFDESTRUCT".into(),
         INVALID(op) => format!("INVALID(0x{:x})", op),
-        PUSHN(n, v) => format!("PUSH{}\t0x{}", n, v),
+        PUSHN(n, v) => format!("PUSH{}\t0x{}", n, hex::encode(v)),
         DUPN(n) => format!("DUP{}", n),
         SWAPN(n) => format!("SWAP{}", n),
         LOGN(n) => format!("LOG{}", n),

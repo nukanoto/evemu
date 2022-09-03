@@ -1,14 +1,13 @@
 use crate::opcode::OpCode;
 
-// TODO: raw opcode
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Block<'a> {
-    pub opcode: OpCode<'a>,
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+pub struct Block {
+    pub opcode: OpCode,
     pub position: usize,
 }
 
-impl<'a> Block<'a> {
-    pub fn new(opcode: OpCode<'a>, position: usize) -> Self {
+impl Block {
+    pub fn new(opcode: OpCode, position: usize) -> Self {
         Self { opcode, position }
     }
 }

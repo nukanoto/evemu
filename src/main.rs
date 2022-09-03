@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use std::{env, fs, path::Path};
 
-use evm_disasm::{formatter, parser};
+use evm_disasm::{formatter, parser, emulator::Emulator};
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -16,6 +16,14 @@ fn main() -> Result<()> {
 
     let parsed = parser::parse(&bytecode);
     print!("{}", formatter::format(&parsed));
+    let mut emu = Emulator::new(parsed);
+    println!("Stack: {:02x?}", emu.stack);
+    while !emu.is_end() {
+        println!("---------");
+        print!("{}", formatter::format(&[emu.current_block().clone()]));
+        emu.run()?;
+        println!("Stack: {:02x?}", emu.stack);
+    }
 
     Ok(())
 }

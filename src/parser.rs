@@ -1,4 +1,4 @@
-use nom::{bytes::complete::take_while_m_n, combinator::map_res, multi::many0, IResult};
+use nom::{bytes::complete::take_while_m_n, combinator::map_res, multi::{many0, many_m_n}, IResult};
 use nom_locate::LocatedSpan;
 
 use crate::{block::Block, opcode::OpCode};
@@ -37,7 +37,7 @@ fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
     })
 }
 
-fn parse_opcode(input: Span) -> IResult<Span, OpCode> {
+fn parse_opcode<'a>(input: Span<'a>) -> IResult<Span, OpCode> {
     let (input, op) = parse_hex_u8(input)?;
 
     let (input, result) = match op {
@@ -124,9 +124,9 @@ fn parse_opcode(input: Span) -> IResult<Span, OpCode> {
                 // PUSH1-32
                 let n = op - 0x60 + 1;
                 let (input_, value) =
-                    take_while_m_n((n * 2).into(), (n * 2).into(), is_hex_digit)(input)?;
+                    many_m_n(n.into(), n.into(), parse_hex_u8)(input)?;
                 input = input_;
-                result = OpCode::PUSHN(n, value.fragment());
+                result = OpCode::PUSHN(n, value);
             } else if (0x80..0x90).contains(&op) {
                 // DUP1-32
                 let n = op - 0x80 + 1;
@@ -193,7 +193,7 @@ mod tests {
             parsed,
             vec![
                 Block {
-                    opcode: PUSHN(1, "0f"),
+                    opcode: PUSHN(1, b"0f"),
                     position: 0
                 },
                 Block {
@@ -201,7 +201,7 @@ mod tests {
                     position: 2
                 },
                 Block {
-                    opcode: PUSHN(1, "09"),
+                    opcode: PUSHN(1, b"09"),
                     position: 3
                 },
                 Block {
@@ -221,7 +221,7 @@ mod tests {
                     position: 8
                 },
                 Block {
-                    opcode: PUSHN(1, "00"),
+                    opcode: PUSHN(1, b"00"),
                     position: 9
                 },
                 Block {
@@ -229,7 +229,7 @@ mod tests {
                     position: 11
                 },
                 Block {
-                    opcode: PUSHN(1, "20"),
+                    opcode: PUSHN(1, b"20"),
                     position: 12
                 },
                 Block {
@@ -241,7 +241,7 @@ mod tests {
                     position: 15
                 },
                 Block {
-                    opcode: PUSHN(1, "00"),
+                    opcode: PUSHN(1, b"00"),
                     position: 16
                 },
                 Block {
@@ -249,11 +249,11 @@ mod tests {
                     position: 18
                 },
                 Block {
-                    opcode: PUSHN(1, "20"),
+                    opcode: PUSHN(1, b"20"),
                     position: 19
                 },
                 Block {
-                    opcode: PUSHN(1, "00"),
+                    opcode: PUSHN(1, b"00"),
                     position: 21
                 },
                 Block {

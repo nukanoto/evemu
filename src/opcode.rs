@@ -1,5 +1,5 @@
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub enum OpCode<'a> {
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+pub enum OpCode {
     STOP,
     ADD,
     MUL,
@@ -63,7 +63,7 @@ pub enum OpCode<'a> {
     MSIZE,
     GAS,
     JUMPDEST,
-    PUSHN(u8, &'a str),
+    PUSHN(u8, Vec<u8>),
     DUPN(u8),
     SWAPN(u8),
     LOGN(u8),
