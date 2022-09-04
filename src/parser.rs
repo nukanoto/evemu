@@ -5,9 +5,9 @@ use nom::{
     IResult,
 };
 use nom_locate::LocatedSpan;
-use num256::Uint256;
+use num_traits::Num;
 
-use crate::{block::Block, opcode::OpCode};
+use crate::{block::Block, opcode::OpCode, Uint256};
 
 type Span<'a> = LocatedSpan<&'a str>;
 

@@ -1,8 +1,6 @@
 use anyhow::Result;
-use num256::Uint256;
-use num_bigint::BigUint;
 
-use crate::{block::Block, opcode::OpCode, util::UtilFromInto};
+use crate::{block::Block, opcode::OpCode, Uint256};
 
 #[derive(Debug, Default)]
 pub struct Emulator<'a> {
@@ -74,19 +72,19 @@ impl<'a> Emulator<'a> {
     }
 
     fn eval_returndatasize(&mut self) {
-        self.stack.push(num256::Uint256(BigUint::from(0usize)));
+        self.stack.push(Uint256::from(0usize));
     }
 
     fn eval_calldataload(&mut self) {
-        let offset = self.use_stack().util_into();
+        let offset = self.use_stack().try_into().unwrap();
         let v = Uint256::from_bytes_be(&self.calldata[offset..]);
         self.stack.push(v);
     }
 
     fn eval_codecopy(&mut self) {
-        let dest_offset = self.use_stack().util_into();
-        let offset = self.use_stack().util_into();
-        let size = self.use_stack().util_into();
+        let dest_offset = self.use_stack().try_into().unwrap();
+        let offset = self.use_stack().try_into().unwrap();
+        let size = self.use_stack().try_into().unwrap();
 
         let with_zero_padding = {
             let mut v = self.raw_code[offset..].to_vec().clone();
@@ -108,17 +106,16 @@ impl<'a> Emulator<'a> {
     }
 
     fn eval_return(&mut self) {
-        let offset: usize = self.use_stack().util_into();
-        let size: usize = self.use_stack().util_into();
+        let offset: usize = self.use_stack().try_into().unwrap();
+        let size: usize = self.use_stack().try_into().unwrap();
 
         self.return_data = self.memory[offset..(offset + size)].to_vec();
     }
 
     fn eval_sar(&mut self) {
-        let shift = self.use_stack().util_into();
-        let value = self.use_stack().util_into();
+        let shift: usize = self.use_stack().try_into().unwrap();
+        let value: usize = self.use_stack().try_into().unwrap();
         println!("Shift: {}", shift);
-        self.stack
-            .push(num256::Uint256(BigUint::from(value >> shift)));
+        self.stack.push((value >> shift).into());
     }
 }

@@ -1,4 +1,4 @@
-use num256::Uint256;
+use crate::Uint256;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum OpCode {
