@@ -1,3 +1,5 @@
+use num256::Uint256;
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum OpCode {
     STOP,
@@ -63,7 +65,7 @@ pub enum OpCode {
     MSIZE,
     GAS,
     JUMPDEST,
-    PUSHN(u8, Vec<u8>),
+    PUSHN(u8, Uint256),
     DUPN(u8),
     SWAPN(u8),
     LOGN(u8),

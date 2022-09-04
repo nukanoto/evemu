@@ -1,5 +1,11 @@
-use nom::{bytes::complete::take_while_m_n, combinator::map_res, multi::{many0, many_m_n}, IResult};
+use nom::{
+    bytes::complete::take_while_m_n,
+    combinator::map_res,
+    multi::{many0},
+    IResult,
+};
 use nom_locate::LocatedSpan;
+use num256::Uint256;
 
 use crate::{block::Block, opcode::OpCode};
 
@@ -120,28 +126,28 @@ fn parse_opcode<'a>(input: Span<'a>) -> IResult<Span, OpCode> {
             let mut input = input;
             let result: OpCode;
 
-            if (0x60..0x80).contains(&op) {
+            result = if (0x60..0x80).contains(&op) {
                 // PUSH1-32
                 let n = op - 0x60 + 1;
                 let (input_, value) =
-                    many_m_n(n.into(), n.into(), parse_hex_u8)(input)?;
+                    take_while_m_n((n * 2).into(), (n * 2).into(), is_hex_digit)(input)?;
                 input = input_;
-                result = OpCode::PUSHN(n, value);
+                OpCode::PUSHN(n, Uint256::from_str_radix(value.fragment(), 16).unwrap())
             } else if (0x80..0x90).contains(&op) {
                 // DUP1-32
                 let n = op - 0x80 + 1;
-                result = OpCode::DUPN(n);
+                OpCode::DUPN(n)
             } else if (0x90..0xA0).contains(&op) {
                 // SWAP1-32
                 let n = op - 0x90 + 1;
-                result = OpCode::SWAPN(n);
+                OpCode::SWAPN(n)
             } else if (0xA0..0xA5).contains(&op) {
                 // LOG1-32
                 let n = op - 0xA0 + 1;
-                result = OpCode::LOGN(n);
+                OpCode::LOGN(n)
             } else {
-                result = OpCode::INVALID(op)
-            }
+                OpCode::INVALID(op)
+            };
 
             (input, result)
         }
