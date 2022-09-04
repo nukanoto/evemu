@@ -57,6 +57,7 @@ impl<'a> Emulator<'a> {
             OpCode::EQ => self.eval_eq(),
             OpCode::JUMPI => self.eval_jumpi()?,
             OpCode::JUMPDEST => self.eval_jumpdest(),
+            OpCode::ADD => self.eval_add(),
             _ => todo!(),
         }
 
@@ -152,11 +153,9 @@ impl<'a> Emulator<'a> {
 
     fn eval_jumpdest(&mut self) {}
 
-    fn _eval_add(&mut self) {
-        /*
+    fn eval_add(&mut self) {
         let l = self.use_stack();
         let r = self.use_stack();
-        */
-        todo!()
+        self.stack.push((l + r).fit())
     }
 }
