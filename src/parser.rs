@@ -1,9 +1,4 @@
-use nom::{
-    bytes::complete::take_while_m_n,
-    combinator::map_res,
-    multi::{many0},
-    IResult,
-};
+use nom::{bytes::complete::take_while_m_n, combinator::map_res, multi::many0, IResult};
 use nom_locate::LocatedSpan;
 use num_traits::Num;
 
@@ -124,7 +119,6 @@ fn parse_opcode<'a>(input: Span<'a>) -> IResult<Span, OpCode> {
         0xff => (input, OpCode::SELFDESTRUCT),
         _ => {
             let mut input = input;
-            
 
             let result: OpCode = if (0x60..0x80).contains(&op) {
                 // PUSH1-32
@@ -199,7 +193,7 @@ mod tests {
             parsed,
             vec![
                 Block {
-                    opcode: PUSHN(1, b"0f"),
+                    opcode: PUSHN(1, 0x0fu32.into()),
                     position: 0
                 },
                 Block {
@@ -207,7 +201,7 @@ mod tests {
                     position: 2
                 },
                 Block {
-                    opcode: PUSHN(1, b"09"),
+                    opcode: PUSHN(1, 0x09u32.into()),
                     position: 3
                 },
                 Block {
@@ -227,7 +221,7 @@ mod tests {
                     position: 8
                 },
                 Block {
-                    opcode: PUSHN(1, b"00"),
+                    opcode: PUSHN(1, 0x00u32.into()),
                     position: 9
                 },
                 Block {
@@ -235,7 +229,7 @@ mod tests {
                     position: 11
                 },
                 Block {
-                    opcode: PUSHN(1, b"20"),
+                    opcode: PUSHN(1, 0x20u32.into()),
                     position: 12
                 },
                 Block {
@@ -247,7 +241,7 @@ mod tests {
                     position: 15
                 },
                 Block {
-                    opcode: PUSHN(1, b"00"),
+                    opcode: PUSHN(1, 0x00u32.into()),
                     position: 16
                 },
                 Block {
@@ -255,11 +249,11 @@ mod tests {
                     position: 18
                 },
                 Block {
-                    opcode: PUSHN(1, b"20"),
+                    opcode: PUSHN(1, 0x20u32.into()),
                     position: 19
                 },
                 Block {
-                    opcode: PUSHN(1, b"00"),
+                    opcode: PUSHN(1, 0x00u32.into()),
                     position: 21
                 },
                 Block {
