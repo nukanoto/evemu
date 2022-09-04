@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use std::{env, fs, path::Path};
 
-use evm_disasm::{emulator::Emulator, formatter, parser};
+use evm_utils::{emulator::Emulator, formatter, parser};
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
