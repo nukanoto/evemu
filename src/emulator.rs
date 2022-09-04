@@ -10,7 +10,7 @@ pub struct Emulator<'a> {
     pub code: Vec<Block>,
     pub block_index: usize,
     pub stack: Vec<Uint256>,
-    pub memory: [u8; 32],
+    pub memory: Vec<u8>,
     pub return_data: Vec<u8>,
 }
 
@@ -58,6 +58,7 @@ impl<'a> Emulator<'a> {
             OpCode::JUMPI => self.eval_jumpi()?,
             OpCode::JUMPDEST => self.eval_jumpdest(),
             OpCode::ADD => self.eval_add(),
+            OpCode::MSTORE => self.eval_mstore()?,
             _ => todo!(),
         }
 
@@ -114,7 +115,17 @@ impl<'a> Emulator<'a> {
         let offset: usize = self.use_stack().try_into().unwrap();
         let size: usize = self.use_stack().try_into().unwrap();
 
-        self.return_data = self.memory[offset..(offset + size)].to_vec();
+        self.return_data = {
+            let a = self.memory.get(offset..(offset + size));
+            let memory_len = self.memory.len();
+            if a == None {
+                let memory = self.memory.to_vec();
+                let zeros = std::iter::repeat(0).take(size - memory_len).collect();
+                [zeros, memory].concat()
+            } else {
+                a.unwrap().to_vec()
+            }
+        };
     }
 
     fn eval_shr(&mut self) {
@@ -157,5 +168,25 @@ impl<'a> Emulator<'a> {
         let l = self.use_stack();
         let r = self.use_stack();
         self.stack.push((l + r).fit())
+    }
+
+    fn eval_mstore(&mut self) -> Result<()> {
+        let offset: usize = self.use_stack().try_into()?;
+        let value = self.use_stack();
+        let value_bytes = value.to_bytes_be();
+        let value_bytes_len = value_bytes.len();
+
+        let res = {
+            let a = self.memory.get(..offset).map_or(vec![], |v| v.to_vec());
+            let b = self
+                .memory
+                .get(offset + value_bytes_len..)
+                .map_or(vec![], |v| v.to_vec());
+            [a, value_bytes, b].concat()
+        };
+
+        self.memory = res;
+
+        Ok(())
     }
 }
