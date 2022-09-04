@@ -66,7 +66,7 @@ fn parse_opcode(input: Span) -> IResult<Span, OpCode> {
         0x19 => (input, OpCode::NOT),
         0x1a => (input, OpCode::BYTE),
         0x1b => (input, OpCode::SHL),
-        0x1c => (input, OpCode::SAR),
+        0x1c => (input, OpCode::SHR),
         0x20 => (input, OpCode::SHA3),
         0x30 => (input, OpCode::ADDRESS),
         0x31 => (input, OpCode::BALANCE),
