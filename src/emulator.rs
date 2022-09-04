@@ -56,6 +56,7 @@ impl<'a> Emulator<'a> {
             OpCode::SHR => self.eval_shr(),
             OpCode::EQ => self.eval_eq(),
             OpCode::JUMPI => self.eval_jumpi()?,
+            OpCode::JUMPDEST => self.eval_jumpdest(),
             _ => todo!(),
         }
 
@@ -80,8 +81,7 @@ impl<'a> Emulator<'a> {
 
     fn eval_calldataload(&mut self) {
         let offset = self.use_stack().try_into().unwrap();
-        let v = Uint256::from_bytes_be(&self.calldata[offset..]);
-        let v = v.fit();
+        let v = Uint256::from_bytes_be(&self.calldata[offset..offset + 32]);
         self.stack.push(v);
     }
 
@@ -130,8 +130,6 @@ impl<'a> Emulator<'a> {
     fn eval_eq(&mut self) {
         let left = self.use_stack();
         let right = self.use_stack();
-        println!("left: {:x}", left);
-        println!("right: {:x}", right);
 
         self.stack.push(((left == right) as usize).into())
     }
@@ -141,14 +139,24 @@ impl<'a> Emulator<'a> {
         let b = self.use_stack();
 
         if !(b == 0usize.into()) {
-            dbg!(&counter);
             self.block_index = self
                 .code
                 .iter()
                 .position(|x| x.position == counter)
-                .unwrap() - 1;
+                .unwrap()
+                - 1;
         }
 
         Ok(())
+    }
+
+    fn eval_jumpdest(&mut self) {}
+
+    fn _eval_add(&mut self) {
+        /*
+        let l = self.use_stack();
+        let r = self.use_stack();
+        */
+        todo!()
     }
 }
