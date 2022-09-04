@@ -38,7 +38,7 @@ fn parse_hex_u8(input: Span) -> IResult<Span, u8> {
     })
 }
 
-fn parse_opcode<'a>(input: Span<'a>) -> IResult<Span, OpCode> {
+fn parse_opcode(input: Span) -> IResult<Span, OpCode> {
     let (input, op) = parse_hex_u8(input)?;
 
     let (input, result) = match op {

@@ -15,7 +15,7 @@ fn main() -> Result<()> {
     };
     let bytecode = bytecode.trim();
 
-    let parsed = parser::parse(&bytecode);
+    let parsed = parser::parse(bytecode);
     print!("{}", formatter::format(&parsed));
     let calldata = hex::decode("0f52d66e00000000000000000000000000000000000000000000000000000000000000640000000000000000000000000000000000000000000000000000000000000064").unwrap();
     let mut emu = Emulator::new(
