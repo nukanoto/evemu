@@ -87,7 +87,7 @@ impl<'a> Emulator<'a> {
         let size = self.use_stack().try_into().unwrap();
 
         let with_zero_padding = {
-            let mut v = self.raw_code[offset..].to_vec().clone();
+            let mut v = self.raw_code[offset..].to_vec();
             while v.len() < size {
                 v.push(0);
             }

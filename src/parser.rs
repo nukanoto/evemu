@@ -124,9 +124,9 @@ fn parse_opcode<'a>(input: Span<'a>) -> IResult<Span, OpCode> {
         0xff => (input, OpCode::SELFDESTRUCT),
         _ => {
             let mut input = input;
-            let result: OpCode;
+            
 
-            result = if (0x60..0x80).contains(&op) {
+            let result: OpCode = if (0x60..0x80).contains(&op) {
                 // PUSH1-32
                 let n = op - 0x60 + 1;
                 let (input_, value) =
