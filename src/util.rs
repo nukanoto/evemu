@@ -13,7 +13,11 @@ where
 impl Uint256Util for Uint256 {
     fn fit(&self) -> Self {
         let a = self.to_biguint().unwrap().to_u32_digits();
-        let b = a[a.len() - 8..].to_vec();
+        let b = if a.len() >= 8 {
+            a[a.len() - 8..].to_vec()
+        } else {
+            a
+        };
         Self::new(b)
     }
 }

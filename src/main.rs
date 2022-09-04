@@ -4,6 +4,7 @@ use std::{env, fs, path::Path};
 
 use evm_utils::{emulator::Emulator, formatter, parser};
 
+// TODO: add CLI
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 

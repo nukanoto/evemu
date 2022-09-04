@@ -1,13 +1,14 @@
 use anyhow::Result;
 
-use crate::{block::Block, opcode::OpCode, Uint256, util::Uint256Util};
+use crate::{block::Block, opcode::OpCode, util::Uint256Util, Uint256};
 
+// TODO: use program counter
 #[derive(Debug, Default)]
 pub struct Emulator<'a> {
     pub calldata: &'a [u8],
     pub raw_code: Vec<u8>,
     pub code: Vec<Block>,
-    pub position: usize,
+    pub block_index: usize,
     pub stack: Vec<Uint256>,
     pub memory: [u8; 32],
     pub return_data: Vec<u8>,
@@ -24,11 +25,11 @@ impl<'a> Emulator<'a> {
     }
 
     pub fn is_end(&self) -> bool {
-        !self.return_data.is_empty() || self.position >= self.code.len()
+        !self.return_data.is_empty() || self.block_index >= self.code.len()
     }
 
     pub fn current_block(&self) -> &Block {
-        &self.code[self.position]
+        &self.code[self.block_index]
     }
 
     pub fn get_stack(&self, position: usize) -> Uint256 {
@@ -54,10 +55,11 @@ impl<'a> Emulator<'a> {
             OpCode::RETURN => self.eval_return(),
             OpCode::SHR => self.eval_shr(),
             OpCode::EQ => self.eval_eq(),
+            OpCode::JUMPI => self.eval_jumpi()?,
             _ => todo!(),
         }
 
-        self.position += 1;
+        self.block_index += 1;
 
         Ok(())
     }
@@ -132,5 +134,21 @@ impl<'a> Emulator<'a> {
         println!("right: {:x}", right);
 
         self.stack.push(((left == right) as usize).into())
+    }
+
+    fn eval_jumpi(&mut self) -> Result<()> {
+        let counter: usize = self.use_stack().try_into()?;
+        let b = self.use_stack();
+
+        if !(b == 0usize.into()) {
+            dbg!(&counter);
+            self.block_index = self
+                .code
+                .iter()
+                .position(|x| x.position == counter)
+                .unwrap() - 1;
+        }
+
+        Ok(())
     }
 }
