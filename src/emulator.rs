@@ -114,8 +114,8 @@ impl<'a> Emulator<'a> {
 
     fn eval_sar(&mut self) {
         let shift: usize = self.use_stack().try_into().unwrap();
-        let value: usize = self.use_stack().try_into().unwrap();
+        let value = self.use_stack();
         println!("Shift: {}", shift);
-        self.stack.push((value >> shift).into());
+        self.stack.push(value >> shift);
     }
 }
