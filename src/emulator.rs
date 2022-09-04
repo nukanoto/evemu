@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::{block::Block, opcode::OpCode, Uint256};
+use crate::{block::Block, opcode::OpCode, Uint256, util::Uint256Util};
 
 #[derive(Debug, Default)]
 pub struct Emulator<'a> {
@@ -52,7 +52,8 @@ impl<'a> Emulator<'a> {
             OpCode::CALLDATALOAD => self.eval_calldataload(),
             OpCode::CODECOPY => self.eval_codecopy(),
             OpCode::RETURN => self.eval_return(),
-            OpCode::SAR => self.eval_sar(),
+            OpCode::SHR => self.eval_shr(),
+            OpCode::EQ => self.eval_eq(),
             _ => todo!(),
         }
 
@@ -78,6 +79,7 @@ impl<'a> Emulator<'a> {
     fn eval_calldataload(&mut self) {
         let offset = self.use_stack().try_into().unwrap();
         let v = Uint256::from_bytes_be(&self.calldata[offset..]);
+        let v = v.fit();
         self.stack.push(v);
     }
 
@@ -112,10 +114,23 @@ impl<'a> Emulator<'a> {
         self.return_data = self.memory[offset..(offset + size)].to_vec();
     }
 
-    fn eval_sar(&mut self) {
+    fn eval_shr(&mut self) {
         let shift: usize = self.use_stack().try_into().unwrap();
         let value = self.use_stack();
-        println!("Shift: {}", shift);
-        self.stack.push(value >> shift);
+
+        if shift > 255 {
+            self.stack.push(0u32.into())
+        } else {
+            self.stack.push(value >> shift);
+        }
+    }
+
+    fn eval_eq(&mut self) {
+        let left = self.use_stack();
+        let right = self.use_stack();
+        println!("left: {:x}", left);
+        println!("right: {:x}", right);
+
+        self.stack.push(((left == right) as usize).into())
     }
 }
