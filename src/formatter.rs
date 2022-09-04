@@ -39,6 +39,7 @@ fn fmt_opcode(op: &OpCode) -> String {
         BYTE => "BYTE".into(),
         SHL => "SHL".into(),
         SHR => "SHR".into(),
+        SAR => "SAR".into(),
         SHA3 => "SHA3".into(),
         ADDRESS => "ADDRESS".into(),
         BALANCE => "BALANCE".into(),

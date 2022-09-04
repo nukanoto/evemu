@@ -27,6 +27,7 @@ pub enum OpCode {
     BYTE,
     SHL,
     SHR,
+    SAR,
     SHA3,
     ADDRESS,
     BALANCE,
